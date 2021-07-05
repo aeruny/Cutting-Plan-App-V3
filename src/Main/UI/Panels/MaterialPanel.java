@@ -35,7 +35,7 @@ public class MaterialPanel extends JPanel {
 
         // Labels
         JLabel rawMatLabel = buildLabel("Material Length: ", 16);
-        JLabel toleranceLabel = buildLabel("Tolerance Length: ", 14);
+        JLabel toleranceLabel = buildLabel("Blade Thickness: ", 14);
 
         // TextField
         matNameInput = new HintTextField("Material " + (index + 1), 8);

@@ -20,7 +20,6 @@ public class CuttingPlan {
     private double[] lengths;
     private int[] quantities;
 
-    private String[][] plan;
     private Object[][] tableContents;
     private String[] columnNames;
 
@@ -40,13 +39,11 @@ public class CuttingPlan {
         // Process Cutting Plan
         double[][] cuttingPlan = calculateCuttingPlan(materialLength, bladeThickness, lengths, quantities);
         cuttingPlan = optimizedPlan(cuttingPlan);
-        plan = toStringArray(cuttingPlan);
 
         // Conversion to Output
         setTotal(cuttingPlan);
         setExcessLengths(materialLength, bladeThickness, cuttingPlan);
-
-        setTableContents(cuttingPlan);
+        setTableContents(toStringArray(cuttingPlan));
         setColumnNames(cuttingPlan);
     }
 
@@ -141,7 +138,10 @@ public class CuttingPlan {
         String[][] array = new String[input.length][input[0].length];
         for(int r = 0; r < array.length; r++) {
             for(int c = 0; c < array[r].length; c++) {
-                array[r][c] = Double.toString(input[r][c]);
+                if(input[r][c] == 0)
+                    array[r][c] = "";
+                else
+                    array[r][c] = Double.toString(input[r][c]);
             }
         }
         return array;
@@ -209,7 +209,7 @@ public class CuttingPlan {
     }
 
 
-    private void setTableContents(double[][] cuttingPlan) {
+    private void setTableContents(String[][] cuttingPlan) {
         System.out.println("CuttingPlan: Setting Table Contents");
         Object[][] table = new Object[cuttingPlan.length][cuttingPlan[0].length + 3];
         for(int i = 0; i < table.length; i++) {
@@ -220,7 +220,7 @@ public class CuttingPlan {
                 if(j == 0)
                     cellStr = Integer.toString(i + 1);
                 else if(j <= cuttingPlan[i].length)
-                    cellStr = Double.toString(cuttingPlan[i][j - 1]);
+                    cellStr = cuttingPlan[i][j - 1];
                 else if(j == cuttingPlan[i].length + 1) // Blade Thickness
                     cellStr = Integer.toString(cutCounts[i]);
                 else if(j == cuttingPlan[i].length + 2) // Excess
@@ -242,7 +242,7 @@ public class CuttingPlan {
             columnNames[i] = Integer.toString(i);
         }
         columnNames[columnNames.length - 2] = "# of Cuts";
-        columnNames[columnNames.length - 1] = "Remainder";
+        columnNames[columnNames.length - 1] = "Excess";
     }
 
 
