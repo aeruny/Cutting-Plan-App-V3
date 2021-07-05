@@ -31,7 +31,7 @@ public class CuttingPlanPanel extends JPanel{
         JLabel targetLabel = buildLabel("Material Length: " + cuttingPlan.getMaterialLength(), 12);
         JLabel toleranceLabel = buildLabel("Blade Thickness: " + cuttingPlan.getBladeThickness(), 12);
         JLabel totalLabel = buildLabel("Total Amount: " + cuttingPlan.getTotal(), 14);
-        JLabel excessLabel = buildLabel("Excess Length: " + cuttingPlan.getTotalRemainder(), 14);
+        JLabel excessLabel = buildLabel("Excess Length: " + cuttingPlan.getTotalExcess(), 14);
 
         // Set JTable with the data from parameter
         JTable table = buildTable(tableContents, columnNames);

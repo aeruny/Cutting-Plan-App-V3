@@ -41,7 +41,7 @@ public class Printer {
             // Results
             bw.append("Results:,\n");
             bw.append("Total:,").append(String.valueOf(cuttingPlan.getTotal())).append("\n");
-            bw.append("Total Excess Length:,").append(String.valueOf(cuttingPlan.getTotalRemainder())).append("\n");
+            bw.append("Total Excess Length:,").append(String.valueOf(cuttingPlan.getTotalExcess())).append("\n");
             bw.append("\n\n");
 
 

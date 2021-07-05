@@ -25,8 +25,8 @@ public class CuttingPlan {
     private String[] columnNames;
 
     private int total;
-    private double totalRemainder;
-    private double[] remainders;
+    private double totalExcess;
+    private double[] excessLengths;
     private int[] cutCounts;
 
     public CuttingPlan(String materialName, double materialLength, double bladeThickness, Object[][] inputs) {
@@ -44,7 +44,7 @@ public class CuttingPlan {
 
         // Conversion to Output
         setTotal(cuttingPlan);
-        setExcessLengths(materialLength, cuttingPlan);
+        setExcessLengths(materialLength, bladeThickness, cuttingPlan);
 
         setTableContents(cuttingPlan);
         setColumnNames(cuttingPlan);
@@ -57,7 +57,6 @@ public class CuttingPlan {
         int c = 0;                                      // index of plan ArrayList (row)
         int d = 0;                                      // index of plan ArrayList[] (col)
         double temp = materialLength;                   // temporary value of target length for calculation
-        boolean flag = true;                            // flag to check for an empty row
         List<double[]> cuttingPlan = new ArrayList<>(); // empty cutting plan arraylist
         int planLength = (int) (materialLength / lengths[lengths.length-1]);
 
@@ -74,14 +73,15 @@ public class CuttingPlan {
                 // If the current value of temp is subtractable by the pointed length,
                 // Subtract temp by the length and record the length to cuttingPlan
                 // Else, move the pointer b to the next length
-                if(temp >= lengths[b] && quantities[b] > 0) {
-                    //System.out.println("a=" + a + " b= " + b + "      " + quantities[b]);
-                    flag = false;
-                    temp -= lengths[b];
-                    temp -= bladeThickness;
-                    quantities[b]--;
-                    cuttingPlan.get(c)[d] = lengths[b];
-                    d++;
+                if(quantities[b] > 0) { //temp >= lengths[b] + bladeThickness &&
+                    if(temp >= lengths[b]) {
+                        //System.out.println("a=" + a + " b= " + b + "      " + quantities[b]);
+                        temp -= lengths[b];
+                        temp -= (temp > lengths[b]) ? bladeThickness : 0;
+                        quantities[b]--;
+                        cuttingPlan.get(c)[d] = lengths[b];
+                        d++;
+                    }
                 } else {
                     b++;
                 }
@@ -93,15 +93,12 @@ public class CuttingPlan {
             // And set pointer c to the new row, and set pointer d to 0;
             if(a < lengths.length && temp < getMin(a, lengths, quantities)) {
                 cuttingPlan.add(new double[planLength]);
-                flag = true;
                 c++;
                 d = 0;
                 temp = materialLength;
                 b = a;
             }
         }
-        if(flag)
-            cuttingPlan.remove(cuttingPlan.size() - 1);
         return toArray(cuttingPlan);
     }
 
@@ -189,12 +186,12 @@ public class CuttingPlan {
         this.total = cuttingPlan.length;
     }
 
-    private void setExcessLengths(double target, double[][] cuttingPlan) {
+    private void setExcessLengths(double target, double bladeThickness, double[][] cuttingPlan) {
         int numCuts;
         cutCounts = new int[cuttingPlan.length];
         double lengthSum;
         double totalSum = 0;
-        remainders = new double[cuttingPlan.length];
+        excessLengths = new double[cuttingPlan.length];
         for (int i = 0; i < cuttingPlan.length; i++) {
             lengthSum = 0;
             numCuts = 0;
@@ -203,11 +200,12 @@ public class CuttingPlan {
                 if(cuttingPlan[i][j] > 0)
                     numCuts++;
             }
-            cutCounts[i] = numCuts;
-            remainders[i] = target - lengthSum;
+            double excess = target - lengthSum - bladeThickness * numCuts;
+            cutCounts[i] = excess > 0 ? numCuts : numCuts - 1;
+            excessLengths[i] = Math.max(excess, 0);
             totalSum += lengthSum;
         }
-        this.totalRemainder = target * cuttingPlan.length - totalSum;
+        this.totalExcess = target * cuttingPlan.length - totalSum;
     }
 
 
@@ -226,7 +224,7 @@ public class CuttingPlan {
                 else if(j == cuttingPlan[i].length + 1) // Blade Thickness
                     cellStr = Integer.toString(cutCounts[i]);
                 else if(j == cuttingPlan[i].length + 2) // Excess
-                    cellStr = Double.toString(remainders[i]);
+                    cellStr = Double.toString(excessLengths[i]);
                 System.out.println(cellStr);
                 table[i][j] = cellStr;
             }
@@ -288,8 +286,8 @@ public class CuttingPlan {
     public int getTotal() {
         return total;
     }
-    public double getTotalRemainder() {
-        return totalRemainder;
+    public double getTotalExcess() {
+        return totalExcess;
     }
     public Object[][] getTableContents() {
         return tableContents;
